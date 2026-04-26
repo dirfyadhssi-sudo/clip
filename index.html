@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClipSnap — Download Potongan Video</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0c0c0f;
+  --surface: #13131a;
+  --surface2: #1a1a24;
+  --border: #252535;
+  --accent: #ff4d6d;
+  --accent2: #ff8fab;
+  --green: #06d6a0;
+  --yellow: #ffd166;
+  --text: #e8e8f0;
+  --muted: #5a5a78;
+  --font: 'Syne', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* BG GRID */
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image:
+    linear-gradient(rgba(255,77,109,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,77,109,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events:none;
+}
+
+/* HEADER */
+header {
+  width:100%;
+  padding: 28px 40px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: rgba(12,12,15,0.92);
+  backdrop-filter: blur(12px);
+  z-index: 100;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.brand-icon {
+  width: 38px; height: 38px;
+  background: var(--accent);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  box-shadow: 0 0 20px rgba(255,77,109,0.4);
+}
+.brand-name {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+.brand-name span { color: var(--accent); }
+.brand-tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 2px;
+}
+.badge {
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--muted);
+  letter-spacing: 1px;
+}
+
+/* MAIN */
+main {
+  width: 100%;
+  max-width: 780px;
+  padding: 48px 20px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* HERO TEXT */
+.hero {
+  text-align: center;
+  padding: 20px 0 8px;
+}
+.hero h1 {
+  font-size: clamp(28px, 5vw, 46px);
+  font-weight: 800;
+  letter-spacing: -1px;
+  line-height: 1.1;
+  margin-bottom: 12px;
+}
+.hero h1 .hi { color: var(--accent); }
+.hero p {
+  font-size: 15px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* CARD */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+/* URL INPUT SECTION */
+.url-section { padding: 24px; }
+.label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--muted);
+  margin-bottom: 10px;
+  display: block;
+}
+.input-row {
+  display: flex;
+  gap: 10px;
+}
+.url-input {
+  flex: 1;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.url-input:focus { border-color: var(--accent); }
+.url-input::placeholder { color: var(--muted); }
+
+.btn {
+  padding: 14px 22px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+.btn:active { transform: scale(0.97); }
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(255,77,109,0.35);
+}
+.btn-primary:hover { background: #ff6b85; box-shadow: 0 4px 28px rgba(255,77,109,0.5); }
+.btn-primary:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+
+.btn-ghost {
+  background: var(--surface2);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+.btn-green {
+  background: var(--green);
+  color: #0c0c0f;
+  box-shadow: 0 4px 20px rgba(6,214,160,0.3);
+}
+.btn-green:hover { opacity: 0.9; }
+.btn-green:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+
+/* VIDEO INFO */
+#videoInfo { display: none; }
+.video-info-inner {
+  padding: 20px 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+.thumb-wrap {
+  width: 140px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+}
+.thumb-wrap img {
+  width: 100%;
+  display: block;
+}
+.thumb-overlay {
+  position: absolute;
+  inset:0;
+  background: rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+}
+.video-meta { flex: 1; min-width:0; }
+.video-title {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.video-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+.meta-pill {
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 6px;
+  background: var(--surface2);
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+.meta-pill.dur { color: var(--yellow); border-color: rgba(255,209,102,0.3); }
+
+/* TIME PICKER */
+#timePicker { display: none; }
+.time-section {
+  padding: 24px;
+  border-top: 1px solid var(--border);
+}
+.time-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.time-field label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--muted);
+  display: block;
+  margin-bottom: 8px;
+}
+.time-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  transition: border-color 0.2s;
+}
+.time-input-wrap:focus-within { border-color: var(--accent); }
+.time-num {
+  width: 32px;
+  background: none;
+  border: none;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 20px;
+  font-weight: 600;
+  text-align: center;
+  outline: none;
+}
+.time-num::-webkit-inner-spin-button { display: none; }
+.time-sep {
+  font-family: var(--mono);
+  font-size: 18px;
+  color: var(--muted);
+  user-select:none;
+}
+.time-hint {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 6px;
+}
+
+/* RANGE SLIDER */
+.range-wrap {
+  margin-top: 4px;
+  position: relative;
+}
+.range-labels {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.range-track {
+  height: 6px;
+  background: var(--surface2);
+  border-radius: 3px;
+  position: relative;
+  margin-bottom: 16px;
+}
+.range-fill {
+  position: absolute;
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  border-radius: 3px;
+  pointer-events: none;
+}
+.range-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.clip-duration {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--green);
+}
+
+/* FORMAT */
+.format-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+.fmt-btn {
+  flex: 1;
+  padding: 12px;
+  background: var(--surface2);
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+  color: var(--muted);
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: 13px;
+}
+.fmt-btn:hover { border-color: var(--accent); color: var(--accent); }
+.fmt-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(255,77,109,0.08); }
+
+/* PROGRESS */
+#progressSection { display: none; padding: 24px; border-top: 1px solid var(--border); }
+.progress-label {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+}
+.progress-bar-track {
+  height: 4px;
+  background: var(--surface2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  border-radius: 2px;
+  transition: width 0.3s;
+  width: 0%;
+  animation: shimmer 1.5s infinite;
+  background-size: 200% 100%;
+  background-image: linear-gradient(90deg, var(--accent) 0%, var(--accent2) 50%, var(--accent) 100%);
+}
+@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+.status-msg {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 8px;
+}
+
+/* RESULT */
+#resultSection { display: none; }
+.result-inner {
+  padding: 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.result-icon { font-size: 32px; }
+.result-text { flex:1; }
+.result-text h3 { font-size: 16px; font-weight: 700; margin-bottom: 4px; color: var(--green); }
+.result-text p { font-size: 12px; color: var(--muted); font-family: var(--mono); }
+
+/* ERROR */
+.error-box {
+  background: rgba(255,77,109,0.08);
+  border: 1px solid rgba(255,77,109,0.25);
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--accent2);
+  display: none;
+  margin-top: 12px;
+}
+.error-box.show { display: block; }
+
+/* STEPS */
+.steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.step {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 16px;
+  text-align: center;
+}
+.step-num {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: rgba(255,77,109,0.12);
+  border: 1px solid rgba(255,77,109,0.3);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 10px;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+}
+.step h4 { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+.step p { font-size: 11px; color: var(--muted); line-height: 1.5; }
+
+/* SPINNER */
+.spin { animation: rotate 1s linear infinite; display: inline-block; }
+@keyframes rotate { to { transform: rotate(360deg); } }
+
+/* RESPONSIVE */
+@media(max-width:600px) {
+  header { padding: 16px 20px; }
+  .hero h1 { font-size: 26px; }
+  .video-info-inner { flex-direction: column; }
+  .thumb-wrap { width: 100%; max-width: 200px; }
+  .steps { grid-template-columns: 1fr; }
+  .time-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-icon">✂️</div>
+    <div>
+      <div class="brand-name">Clip<span>Snap</span></div>
+      <div class="brand-tag">VIDEO SEGMENT DOWNLOADER</div>
+    </div>
+  </div>
+  <div class="badge">v1.0 LOCAL</div>
+</header>
+
+<main>
+  <!-- HERO -->
+  <div class="hero">
+    <h1>Download <span class="hi">Potongan</span><br>Video YouTube</h1>
+    <p>Masukkan URL, pilih waktu mulai dan akhir, langsung download bagian yang kamu mau.</p>
+  </div>
+
+  <!-- MAIN CARD -->
+  <div class="card">
+    <!-- URL INPUT -->
+    <div class="url-section">
+      <span class="label">// URL VIDEO</span>
+      <div class="input-row">
+        <input type="text" class="url-input" id="urlInput"
+          placeholder="https://www.youtube.com/watch?v=..."
+          oninput="onUrlChange()">
+        <button class="btn btn-primary" id="fetchBtn" onclick="fetchInfo()" disabled>
+          <span id="fetchIcon">🔍</span>
+          <span id="fetchText">Cari</span>
+        </button>
+      </div>
+      <div class="error-box" id="errorBox"></div>
+    </div>
+
+    <!-- VIDEO INFO -->
+    <div id="videoInfo">
+      <div class="video-info-inner">
+        <div class="thumb-wrap">
+          <img id="thumbImg" src="" alt="">
+          <div class="thumb-overlay">▶</div>
+        </div>
+        <div class="video-meta">
+          <div class="video-title" id="videoTitle">—</div>
+          <div id="uploaderName" style="font-size:12px;color:var(--muted);margin-top:4px"></div>
+          <div class="video-meta-row">
+            <div class="meta-pill dur" id="durationPill">—</div>
+            <div class="meta-pill" id="viewPill">— views</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TIME PICKER -->
+    <div id="timePicker">
+      <div class="time-section">
+        <span class="label">// PILIH SEGMEN</span>
+
+        <div class="time-grid">
+          <div class="time-field">
+            <label>WAKTU MULAI</label>
+            <div class="time-input-wrap">
+              <input class="time-num" id="startH" type="number" min="0" max="99" value="0" oninput="onTimeInput()">
+              <span class="time-sep">:</span>
+              <input class="time-num" id="startM" type="number" min="0" max="59" value="0" oninput="onTimeInput()">
+              <span class="time-sep">:</span>
+              <input class="time-num" id="startS" type="number" min="0" max="59" value="0" oninput="onTimeInput()">
+            </div>
+            <div class="time-hint">Jam : Menit : Detik</div>
+          </div>
+          <div class="time-field">
+            <label>WAKTU AKHIR</label>
+            <div class="time-input-wrap">
+              <input class="time-num" id="endH" type="number" min="0" max="99" value="0" oninput="onTimeInput()">
+              <span class="time-sep">:</span>
+              <input class="time-num" id="endM" type="number" min="0" max="59" value="0" oninput="onTimeInput()">
+              <span class="time-sep">:</span>
+              <input class="time-num" id="endS" type="number" min="0" max="59" value="0" oninput="onTimeInput()">
+            </div>
+            <div class="time-hint">Jam : Menit : Detik</div>
+          </div>
+        </div>
+
+        <!-- VISUAL RANGE -->
+        <div class="range-wrap">
+          <div class="range-labels">
+            <span>0:00</span>
+            <span id="durationLabel">—</span>
+          </div>
+          <div class="range-track">
+            <div class="range-fill" id="rangeFill" style="left:0%;width:100%"></div>
+          </div>
+          <div class="range-info">
+            <div class="clip-duration" id="clipDuration">⏱ Durasi clip: —</div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-ghost" style="padding:8px 14px;font-size:12px" onclick="setPreset(0, 30)">30 dtk</button>
+              <button class="btn btn-ghost" style="padding:8px 14px;font-size:12px" onclick="setPreset(0, 60)">1 mnt</button>
+              <button class="btn btn-ghost" style="padding:8px 14px;font-size:12px" onclick="setPreset(0, 300)">5 mnt</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- FORMAT -->
+        <div class="format-row">
+          <div class="fmt-btn active" id="fmtMp4" onclick="setFormat('mp4')">🎬 MP4 (Video)</div>
+          <div class="fmt-btn" id="fmtMp3" onclick="setFormat('mp3')">🎵 MP3 (Audio)</div>
+        </div>
+
+        <!-- DOWNLOAD BTN -->
+        <div style="margin-top:16px">
+          <button class="btn btn-green" id="dlBtn" onclick="startDownload()" style="width:100%;justify-content:center;padding:16px;font-size:15px">
+            <span>⬇️</span> Download Clip
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROGRESS -->
+    <div id="progressSection">
+      <div class="progress-label">
+        <span id="progressLabel">Memproses...</span>
+        <span id="progressPct"></span>
+      </div>
+      <div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill"></div></div>
+      <div class="status-msg" id="statusMsg">Mengunduh video dari server YouTube...</div>
+    </div>
+
+    <!-- RESULT -->
+    <div id="resultSection">
+      <div class="result-inner">
+        <div class="result-icon">✅</div>
+        <div class="result-text">
+          <h3>Download Berhasil!</h3>
+          <p id="resultInfo">File tersimpan di folder Downloads kamu</p>
+        </div>
+        <button class="btn btn-ghost" onclick="resetForm()">Download Lagi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW TO -->
+  <div>
+    <div style="font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--muted);margin-bottom:14px">// CARA PAKAI</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <h4>Paste URL</h4>
+        <p>Salin link video YouTube lalu tempel di kolom input</p>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <h4>Atur Waktu</h4>
+        <p>Set waktu mulai dan akhir bagian yang mau di-download</p>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <h4>Download</h4>
+        <p>Pilih format MP4 atau MP3 lalu klik tombol download</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+let videoDuration = 0;
+let selectedFormat = 'mp4';
+let currentUrl = '';
+
+// ─── URL INPUT ───────────────────────────────────────────────────────
+function onUrlChange() {
+  const val = document.getElementById('urlInput').value.trim();
+  document.getElementById('fetchBtn').disabled = !val;
+  hideError();
+}
+
+// ─── FETCH VIDEO INFO ────────────────────────────────────────────────
+async function fetchInfo() {
+  const url = document.getElementById('urlInput').value.trim();
+  if (!url) return;
+  currentUrl = url;
+
+  setLoading(true);
+  hideError();
+
+  try {
+    const res = await fetch('/api/info', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url })
+    });
+    const data = await res.json();
+
+    if (!res.ok || data.error) throw new Error(data.error || 'Gagal mengambil info video');
+
+    videoDuration = data.duration || 0;
+
+    // Update UI info
+    document.getElementById('thumbImg').src = data.thumbnail || '';
+    document.getElementById('videoTitle').textContent = data.title || 'Judul tidak tersedia';
+    document.getElementById('uploaderName').textContent = data.uploader || '';
+    document.getElementById('durationPill').textContent = '⏱ ' + formatTime(videoDuration);
+    document.getElementById('viewPill').textContent = '👁 ' + formatViews(data.view_count);
+    document.getElementById('durationLabel').textContent = formatTime(videoDuration);
+
+    // Set end time default = durasi penuh (atau 60 detik kalau panjang)
+    const defaultEnd = Math.min(videoDuration, 60);
+    setTimeSecs('end', defaultEnd);
+    setTimeSecs('start', 0);
+    updateRangeFill();
+
+    document.getElementById('videoInfo').style.display = 'block';
+    document.getElementById('timePicker').style.display = 'block';
+    document.getElementById('resultSection').style.display = 'none';
+    document.getElementById('progressSection').style.display = 'none';
+
+  } catch(e) {
+    showError(e.message);
+  } finally {
+    setLoading(false);
+  }
+}
+
+// ─── TIME INPUT ───────────────────────────────────────────────────────
+function onTimeInput() {
+  updateRangeFill();
+}
+
+function getTimeSecs(prefix) {
+  const h = parseInt(document.getElementById(prefix+'H').value) || 0;
+  const m = parseInt(document.getElementById(prefix+'M').value) || 0;
+  const s = parseInt(document.getElementById(prefix+'S').value) || 0;
+  return h*3600 + m*60 + s;
+}
+
+function setTimeSecs(prefix, secs) {
+  secs = Math.max(0, Math.round(secs));
+  const h = Math.floor(secs/3600);
+  const m = Math.floor((secs%3600)/60);
+  const s = secs%60;
+  document.getElementById(prefix+'H').value = h;
+  document.getElementById(prefix+'M').value = m;
+  document.getElementById(prefix+'S').value = s;
+}
+
+function updateRangeFill() {
+  const start = getTimeSecs('start');
+  const end = getTimeSecs('end');
+  const dur = videoDuration || 1;
+
+  const left = (start / dur * 100).toFixed(1);
+  const width = Math.max(0, ((end - start) / dur * 100)).toFixed(1);
+
+  document.getElementById('rangeFill').style.left = left + '%';
+  document.getElementById('rangeFill').style.width = width + '%';
+
+  const clipSecs = Math.max(0, end - start);
+  document.getElementById('clipDuration').textContent =
+    clipSecs > 0 ? `⏱ Durasi clip: ${formatTime(clipSecs)}` : '⚠️ Waktu tidak valid';
+}
+
+function setPreset(startSecs, durationSecs) {
+  setTimeSecs('start', startSecs);
+  setTimeSecs('end', Math.min(startSecs + durationSecs, videoDuration));
+  updateRangeFill();
+}
+
+// ─── FORMAT ───────────────────────────────────────────────────────────
+function setFormat(fmt) {
+  selectedFormat = fmt;
+  document.getElementById('fmtMp4').classList.toggle('active', fmt === 'mp4');
+  document.getElementById('fmtMp3').classList.toggle('active', fmt === 'mp3');
+}
+
+// ─── DOWNLOAD (async job system) ──────────────────────────────────────
+let pollInterval = null;
+
+async function startDownload() {
+  const start = getTimeSecs('start');
+  const end   = getTimeSecs('end');
+
+  if (end <= start) { showError('Waktu akhir harus lebih besar dari waktu mulai!'); return; }
+  if (!currentUrl)  { showError('URL video kosong'); return; }
+
+  document.getElementById('progressSection').style.display = 'block';
+  document.getElementById('resultSection').style.display = 'none';
+  document.getElementById('dlBtn').disabled = true;
+  setProgressMsg('Memulai download...', 5);
+  hideError();
+
+  try {
+    // 1. Kirim request → dapat job_id langsung (tidak timeout)
+    const res = await fetch('/api/start-download', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: currentUrl, start, end, format: selectedFormat })
+    });
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error || 'Gagal memulai download');
+
+    const jobId = data.job_id;
+
+    // 2. Polling status tiap 1.5 detik
+    pollInterval = setInterval(async () => {
+      try {
+        const sr  = await fetch(`/api/job/${jobId}`);
+        const job = await sr.json();
+
+        setProgressMsg(job.message || '...', job.progress || 0);
+
+        if (job.status === 'done') {
+          clearInterval(pollInterval);
+          setProgressMsg('Menyiapkan file...', 99);
+
+          // 3. Trigger download file
+          const fileUrl = `/api/file/${jobId}`;
+          const fr = await fetch(fileUrl);
+          if (!fr.ok) throw new Error('Gagal mengambil file dari server');
+
+          const blob = await fr.blob();
+          const blobUrl = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+
+          const disp = fr.headers.get('Content-Disposition') || '';
+          const nm   = disp.match(/filename="?([^"]+)"?/);
+          a.download  = nm ? nm[1] : `clip.${selectedFormat}`;
+          a.href      = blobUrl;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(blobUrl);
+
+          setProgressMsg('Selesai! 🎉', 100);
+          setTimeout(() => {
+            document.getElementById('progressSection').style.display = 'none';
+            document.getElementById('resultSection').style.display = 'block';
+            document.getElementById('resultInfo').textContent =
+              `${a.download} • ${formatTime(end - start)} • ${selectedFormat.toUpperCase()}`;
+          }, 700);
+          document.getElementById('dlBtn').disabled = false;
+
+        } else if (job.status === 'error') {
+          clearInterval(pollInterval);
+          throw new Error(job.error || 'Download gagal di server');
+        }
+
+      } catch(pollErr) {
+        clearInterval(pollInterval);
+        document.getElementById('progressSection').style.display = 'none';
+        showError(pollErr.message);
+        document.getElementById('dlBtn').disabled = false;
+      }
+    }, 1500);
+
+  } catch(e) {
+    clearInterval(pollInterval);
+    document.getElementById('progressSection').style.display = 'none';
+    showError(e.message);
+    document.getElementById('dlBtn').disabled = false;
+  }
+}
+
+// ─── HELPERS ──────────────────────────────────────────────────────────
+function setProgressMsg(msg, pct) {
+  document.getElementById('statusMsg').textContent = msg;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressPct').textContent = pct + '%';
+}
+
+function setLoading(on) {
+  const btn = document.getElementById('fetchBtn');
+  const icon = document.getElementById('fetchIcon');
+  const txt = document.getElementById('fetchText');
+  btn.disabled = on;
+  icon.textContent = on ? '⏳' : '🔍';
+  txt.textContent = on ? 'Memuat...' : 'Cari';
+}
+
+function showError(msg) {
+  const el = document.getElementById('errorBox');
+  el.textContent = '⚠️ ' + msg;
+  el.classList.add('show');
+}
+function hideError() { document.getElementById('errorBox').classList.remove('show'); }
+
+function resetForm() {
+  document.getElementById('resultSection').style.display = 'none';
+  document.getElementById('progressSection').style.display = 'none';
+  document.getElementById('videoInfo').style.display = 'none';
+  document.getElementById('timePicker').style.display = 'none';
+  document.getElementById('urlInput').value = '';
+  document.getElementById('fetchBtn').disabled = true;
+  currentUrl = '';
+  hideError();
+}
+
+function formatTime(s) {
+  if (!s) return '0:00';
+  s = Math.round(s);
+  const h = Math.floor(s/3600);
+  const m = Math.floor((s%3600)/60);
+  const sec = s%60;
+  if (h > 0) return `${h}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+  return `${m}:${String(sec).padStart(2,'0')}`;
+}
+
+function formatViews(n) {
+  if (!n) return '—';
+  if (n >= 1e9) return (n/1e9).toFixed(1) + 'B';
+  if (n >= 1e6) return (n/1e6).toFixed(1) + 'M';
+  if (n >= 1e3) return (n/1e3).toFixed(1) + 'K';
+  return n;
+}
+
+// Enter key on URL input
+document.getElementById('urlInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') fetchInfo();
+});
+</script>
+</body>
+</html>

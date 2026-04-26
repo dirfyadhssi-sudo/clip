@@ -51,7 +51,7 @@ def build_base_args():
 
 @app.route("/")
 def index():
-    return send_from_directory(".", "indeks.html")
+    return send_from_directory(".", "index.html")
 
 
 @app.route("/api/info", methods=["POST"])

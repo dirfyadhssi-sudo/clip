@@ -157,6 +157,10 @@ main {
   transition: border-color 0.2s;
 }
 .url-input:focus { border-color: var(--accent); }
+.url-input:focus-visible, .btn:focus-visible, .fmt-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
 .url-input::placeholder { color: var(--muted); }
 
 .btn {
@@ -506,20 +510,21 @@ main {
       <div class="input-row">
         <input type="text" class="url-input" id="urlInput"
           placeholder="https://www.youtube.com/watch?v=..."
+          aria-label="URL Video YouTube"
           oninput="onUrlChange()">
         <button class="btn btn-primary" id="fetchBtn" onclick="fetchInfo()" disabled>
           <span id="fetchIcon">🔍</span>
           <span id="fetchText">Cari</span>
         </button>
       </div>
-      <div class="error-box" id="errorBox"></div>
+      <div class="error-box" id="errorBox" role="alert" aria-live="assertive"></div>
     </div>
 
     <!-- VIDEO INFO -->
     <div id="videoInfo">
       <div class="video-info-inner">
         <div class="thumb-wrap">
-          <img id="thumbImg" src="" alt="">
+          <img id="thumbImg" src="" alt="Thumbnail video">
           <div class="thumb-overlay">▶</div>
         </div>
         <div class="video-meta">
@@ -542,22 +547,22 @@ main {
           <div class="time-field">
             <label>WAKTU MULAI</label>
             <div class="time-input-wrap">
-              <input class="time-num" id="startH" type="number" min="0" max="99" value="0" oninput="onTimeInput()">
+              <input class="time-num" id="startH" type="number" min="0" max="99" value="0" aria-label="Jam mulai" onfocus="this.select()" onblur="padTime(this)" oninput="onTimeInput()">
               <span class="time-sep">:</span>
-              <input class="time-num" id="startM" type="number" min="0" max="59" value="0" oninput="onTimeInput()">
+              <input class="time-num" id="startM" type="number" min="0" max="59" value="0" aria-label="Menit mulai" onfocus="this.select()" onblur="padTime(this)" oninput="onTimeInput()">
               <span class="time-sep">:</span>
-              <input class="time-num" id="startS" type="number" min="0" max="59" value="0" oninput="onTimeInput()">
+              <input class="time-num" id="startS" type="number" min="0" max="59" value="0" aria-label="Detik mulai" onfocus="this.select()" onblur="padTime(this)" oninput="onTimeInput()">
             </div>
             <div class="time-hint">Jam : Menit : Detik</div>
           </div>
           <div class="time-field">
             <label>WAKTU AKHIR</label>
             <div class="time-input-wrap">
-              <input class="time-num" id="endH" type="number" min="0" max="99" value="0" oninput="onTimeInput()">
+              <input class="time-num" id="endH" type="number" min="0" max="99" value="0" aria-label="Jam akhir" onfocus="this.select()" onblur="padTime(this)" oninput="onTimeInput()">
               <span class="time-sep">:</span>
-              <input class="time-num" id="endM" type="number" min="0" max="59" value="0" oninput="onTimeInput()">
+              <input class="time-num" id="endM" type="number" min="0" max="59" value="0" aria-label="Menit akhir" onfocus="this.select()" onblur="padTime(this)" oninput="onTimeInput()">
               <span class="time-sep">:</span>
-              <input class="time-num" id="endS" type="number" min="0" max="59" value="0" oninput="onTimeInput()">
+              <input class="time-num" id="endS" type="number" min="0" max="59" value="0" aria-label="Detik akhir" onfocus="this.select()" onblur="padTime(this)" oninput="onTimeInput()">
             </div>
             <div class="time-hint">Jam : Menit : Detik</div>
           </div>
@@ -573,7 +578,7 @@ main {
             <div class="range-fill" id="rangeFill" style="left:0%;width:100%"></div>
           </div>
           <div class="range-info">
-            <div class="clip-duration" id="clipDuration">⏱ Durasi clip: —</div>
+            <div class="clip-duration" id="clipDuration" aria-live="polite">⏱ Durasi clip: —</div>
             <div style="display:flex;gap:8px">
               <button class="btn btn-ghost" style="padding:8px 14px;font-size:12px" onclick="setPreset(0, 30)">30 dtk</button>
               <button class="btn btn-ghost" style="padding:8px 14px;font-size:12px" onclick="setPreset(0, 60)">1 mnt</button>
@@ -891,6 +896,10 @@ function formatViews(n) {
   if (n >= 1e6) return (n/1e6).toFixed(1) + 'M';
   if (n >= 1e3) return (n/1e3).toFixed(1) + 'K';
   return n;
+}
+
+function padTime(el) {
+  if (el.value !== '') el.value = String(parseInt(el.value, 10) || 0).padStart(2, '0');
 }
 
 // Enter key on URL input

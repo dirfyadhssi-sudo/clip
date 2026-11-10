@@ -2,6 +2,22 @@ from flask import Flask, request, jsonify, send_file, send_from_directory
 from flask_cors import CORS
 import yt_dlp
 import os, tempfile, uuid, threading, time, glob, subprocess
+from urllib.parse import urlparse
+
+# Security: Validate YouTube URLs to prevent CLI flag injection and SSRF
+ALLOWED_YOUTUBE_HOSTS = {"youtube.com", "www.youtube.com", "m.youtube.com", "music.youtube.com", "youtu.be"}
+
+def is_valid_youtube_url(url: str) -> bool:
+    if not url or len(url) > 2048:
+        return False
+    try:
+        parsed = urlparse(url)
+        if parsed.scheme not in ("http", "https"):
+            return False
+        host = (parsed.hostname or "").lower()
+        return host in ALLOWED_YOUTUBE_HOSTS
+    except Exception:
+        return False
 
 app = Flask(__name__, static_folder=".")
 CORS(app)
@@ -52,11 +68,14 @@ def get_info():
     url  = (data.get("url") or "").strip()
     if not url:
         return jsonify({"error": "URL kosong"}), 400
+    if not is_valid_youtube_url(url):
+        return jsonify({"error": "URL YouTube tidak valid"}), 400
     try:
+        # Defense-in-depth: use '--' before user url to stop option parsing
         cmd = ["yt-dlp", "-j", "--no-playlist", "--no-check-formats"]
         if os.path.exists(COOKIES_FILE):
             cmd += ["--cookies", COOKIES_FILE]
-        cmd.append(url)
+        cmd += ["--", url]
 
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
         if result.returncode != 0:
@@ -85,6 +104,10 @@ def start_download():
 
     if not url:
         return jsonify({"error": "URL kosong"}), 400
+    if not is_valid_youtube_url(url):
+        return jsonify({"error": "URL YouTube tidak valid"}), 400
+    if fmt not in ("mp4", "mp3"):
+        return jsonify({"error": "Format tidak valid. Hanya mp4 atau mp3 didukung."}), 400
     if end <= start:
         return jsonify({"error": "Waktu akhir harus lebih besar dari waktu awal"}), 400
 
@@ -118,7 +141,7 @@ def run_download(job_id, url, start, end, fmt):
                 "-x", "--audio-format", "mp3",
                 "--audio-quality", "192K",
                 "--newline", "-o", out_tmpl,
-                "--no-playlist", url,
+                "--no-playlist", "--", url,
             ]
         else:
             cmd = ["yt-dlp"] + base_args() + [
@@ -128,7 +151,7 @@ def run_download(job_id, url, start, end, fmt):
                 "--no-check-formats",
                 "--merge-output-format", "mp4",
                 "--newline", "-o", out_tmpl,
-                "--no-playlist", url,
+                "--no-playlist", "--", url,
             ]
 
         update("running", 20, "Mengunduh dari YouTube...")

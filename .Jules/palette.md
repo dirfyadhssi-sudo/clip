@@ -1,0 +1,3 @@
+## 2026-11-10 - Segmented Time Input Usability & Screen Reader Accessibility
+**Learning:** In video cutting and time segment inputs where hours, minutes, and seconds are split into separate numeric inputs without explicit individual labels, screen readers announce them identically as unlabelled number fields. Adding concise Indonesian ARIA labels (`aria-label="Jam mulai"`, etc.) alongside `this.select()` on focus and auto two-digit zero-padding on blur (`padTime`) provides both accessible context and seamless keyboard navigation.
+**Action:** When working with multi-field numeric pickers (time, dates, IP addresses), always provide explicit segment-level ARIA labels and automatic field-selection on focus.

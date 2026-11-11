@@ -3,7 +3,8 @@ from flask_cors import CORS
 import yt_dlp
 import os, tempfile, uuid, threading, time, glob, subprocess
 
-app = Flask(__name__, static_folder=".")
+# Security: Do not expose root repository files as static assets
+app = Flask(__name__, static_folder=None)
 CORS(app)
 
 TEMP_DIR     = tempfile.mkdtemp(prefix="clipsnap_")

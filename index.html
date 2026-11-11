@@ -502,17 +502,17 @@ main {
   <div class="card">
     <!-- URL INPUT -->
     <div class="url-section">
-      <span class="label">// URL VIDEO</span>
+      <label for="urlInput" class="label">// URL VIDEO</label>
       <div class="input-row">
         <input type="text" class="url-input" id="urlInput"
           placeholder="https://www.youtube.com/watch?v=..."
           oninput="onUrlChange()">
-        <button class="btn btn-primary" id="fetchBtn" onclick="fetchInfo()" disabled>
-          <span id="fetchIcon">🔍</span>
+        <button class="btn btn-primary" id="fetchBtn" onclick="fetchInfo()" disabled aria-label="Cari info video">
+          <span id="fetchIcon" aria-hidden="true">🔍</span>
           <span id="fetchText">Cari</span>
         </button>
       </div>
-      <div class="error-box" id="errorBox"></div>
+      <div class="error-box" id="errorBox" role="alert" aria-live="polite"></div>
     </div>
 
     <!-- VIDEO INFO -->
@@ -540,24 +540,24 @@ main {
 
         <div class="time-grid">
           <div class="time-field">
-            <label>WAKTU MULAI</label>
+            <label id="startLabel">WAKTU MULAI</label>
             <div class="time-input-wrap">
-              <input class="time-num" id="startH" type="number" min="0" max="99" value="0" oninput="onTimeInput()">
-              <span class="time-sep">:</span>
-              <input class="time-num" id="startM" type="number" min="0" max="59" value="0" oninput="onTimeInput()">
-              <span class="time-sep">:</span>
-              <input class="time-num" id="startS" type="number" min="0" max="59" value="0" oninput="onTimeInput()">
+              <input class="time-num" id="startH" type="number" min="0" max="99" value="0" oninput="onTimeInput()" aria-label="Waktu mulai jam">
+              <span class="time-sep" aria-hidden="true">:</span>
+              <input class="time-num" id="startM" type="number" min="0" max="59" value="0" oninput="onTimeInput()" aria-label="Waktu mulai menit">
+              <span class="time-sep" aria-hidden="true">:</span>
+              <input class="time-num" id="startS" type="number" min="0" max="59" value="0" oninput="onTimeInput()" aria-label="Waktu mulai detik">
             </div>
             <div class="time-hint">Jam : Menit : Detik</div>
           </div>
           <div class="time-field">
-            <label>WAKTU AKHIR</label>
+            <label id="endLabel">WAKTU AKHIR</label>
             <div class="time-input-wrap">
-              <input class="time-num" id="endH" type="number" min="0" max="99" value="0" oninput="onTimeInput()">
-              <span class="time-sep">:</span>
-              <input class="time-num" id="endM" type="number" min="0" max="59" value="0" oninput="onTimeInput()">
-              <span class="time-sep">:</span>
-              <input class="time-num" id="endS" type="number" min="0" max="59" value="0" oninput="onTimeInput()">
+              <input class="time-num" id="endH" type="number" min="0" max="99" value="0" oninput="onTimeInput()" aria-label="Waktu akhir jam">
+              <span class="time-sep" aria-hidden="true">:</span>
+              <input class="time-num" id="endM" type="number" min="0" max="59" value="0" oninput="onTimeInput()" aria-label="Waktu akhir menit">
+              <span class="time-sep" aria-hidden="true">:</span>
+              <input class="time-num" id="endS" type="number" min="0" max="59" value="0" oninput="onTimeInput()" aria-label="Waktu akhir detik">
             </div>
             <div class="time-hint">Jam : Menit : Detik</div>
           </div>
@@ -598,13 +598,13 @@ main {
     </div>
 
     <!-- PROGRESS -->
-    <div id="progressSection">
+    <div id="progressSection" role="region" aria-label="Progres download">
       <div class="progress-label">
         <span id="progressLabel">Memproses...</span>
         <span id="progressPct"></span>
       </div>
-      <div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill"></div></div>
-      <div class="status-msg" id="statusMsg">Mengunduh video dari server YouTube...</div>
+      <div class="progress-bar-track" role="progressbar" id="progressBar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-labelledby="progressLabel"><div class="progress-bar-fill" id="progressFill"></div></div>
+      <div class="status-msg" id="statusMsg" aria-live="polite">Mengunduh video dari server YouTube...</div>
     </div>
 
     <!-- RESULT -->
@@ -846,6 +846,8 @@ function setProgressMsg(msg, pct) {
   document.getElementById('statusMsg').textContent = msg;
   document.getElementById('progressFill').style.width = pct + '%';
   document.getElementById('progressPct').textContent = pct + '%';
+  const bar = document.getElementById('progressBar');
+  if (bar) bar.setAttribute('aria-valuenow', pct);
 }
 
 function setLoading(on) {
